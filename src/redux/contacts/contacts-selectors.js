@@ -1,3 +1,2 @@
-const getAllContacts = store => store.contacts
-
-export default getAllContacts;
+export const getAllContacts = store => store.contacts;
+export const getFilter = store => store.filter;

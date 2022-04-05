@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 
 import actions from '../redux/contacts/contacts-actions';
-import getAllContacts from '../redux/contacts/contacts-selectors';
+import { getAllContacts } from '../redux/contacts/contacts-selectors';
+import { getFilter } from '../redux/contacts/contacts-selectors';
 
 import ContactForm from './contactForm/ContactForm';
 import Filter from './filter/Filter';
@@ -13,17 +14,30 @@ import styles from './app.module.css';
 
 export const App = () => {
   const contacts = useSelector(getAllContacts, shallowEqual);
-  const [filter, setFilter] = useState('');
+  const filter = useSelector(getFilter, shallowEqual);
 
   const dispatch = useDispatch();
 
   const firstRender = useRef(true);
 
-  const filteringContacts = useCallback(ev => {
-    setFilter(ev.target.value);
-  }, []);
+  useEffect(() => {
+    const localContacts = JSON.parse(localStorage.getItem('contacts'));
+    if (firstRender.current && localContacts.length) {
+      for (let contact of localContacts) {
+        dispatch(actions.add(contact));
+      }
+    }
+    if (!firstRender.current && localContacts.length !== contacts.length) {
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+    }
+    firstRender.current = false;
+    //eslint-disable-next-line
+  }, [contacts]);
 
-  console.log('render');
+  const filteringContacts = useCallback(ev => {
+    dispatch(actions.filterContacts(ev.target.value));
+    //eslint-disable-next-line
+  }, []);
 
   const addNewContact = contactData => {
     const { name, number } = contactData;
@@ -41,20 +55,6 @@ export const App = () => {
   const deleteContact = id => {
     dispatch(actions.remove(id));
   };
-
-  useEffect(() => {
-    const localContacts = JSON.parse(localStorage.getItem('contacts'));
-    if (firstRender.current && localContacts.length) {
-      for (let contact of localContacts) {
-        dispatch(actions.add(contact));
-      }
-    }
-    if (!firstRender.current && localContacts.length !== contacts.length) {
-      localStorage.setItem('contacts', JSON.stringify(contacts));
-    }
-    firstRender.current = false;
-    //eslint-disable-next-line
-  }, [contacts]);
 
   const filteredContacts = () => {
     const filteredContacts = contacts.filter(contact =>
@@ -80,5 +80,3 @@ export const App = () => {
     </div>
   );
 };
-
-// export App;
