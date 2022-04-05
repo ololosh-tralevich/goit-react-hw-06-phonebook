@@ -22,12 +22,12 @@ export const App = () => {
 
   useEffect(() => {
     const localContacts = JSON.parse(localStorage.getItem('contacts'));
-    if (firstRender.current && localContacts.length) {
+    if (firstRender.current && localContacts?.length) {
       for (let contact of localContacts) {
         dispatch(actions.add(contact));
       }
     }
-    if (!firstRender.current && localContacts.length !== contacts.length) {
+    if (!firstRender.current && localContacts?.length !== contacts.length) {
       localStorage.setItem('contacts', JSON.stringify(contacts));
     }
     firstRender.current = false;
